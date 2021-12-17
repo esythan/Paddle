@@ -1023,6 +1023,25 @@ void FleetWrapper::PrintTableStat(const uint64_t table_id) {
 #endif
 }
 
+uint64_t FleetWrapper::GetSavedFeasignSize(const uint64_t table_id) {
+#ifdef PADDLE_WITH_PSLIB
+  uint64_t feasign_size = 0;
+  auto ret =
+      pslib_ptr_->_worker_ptr->get_saved_feasign_size(table_id, feasign_size);
+  ret.wait();
+  int32_t err_code = ret.get();
+  if (err_code == -1) {
+    LOG(ERROR) << "get saved feasign size failed";
+    sleep(sleep_seconds_before_fail_exit_);
+    exit(-1);
+  }
+  return feasign_size;
+#else
+  VLOG(0) << "FleetWrapper::PrintTableStat does nothing when no pslib";
+  return 0;
+#endif
+}
+
 double FleetWrapper::GetCacheThreshold(int table_id) {
 #ifdef PADDLE_WITH_PSLIB
   double cache_threshold = 0.0;
